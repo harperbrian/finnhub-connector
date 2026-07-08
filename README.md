@@ -143,14 +143,49 @@ This last step tells the Claude Desktop app how to find and run your server.
 - **Mac/Linux:** inside the project folder, run `pwd`
 - **Windows:** inside the project folder, run `cd` with no arguments
 
+**Confirm the path is correct before editing anything** — this avoids the single most common setup mistake, a path that doesn't point where you think it does:
+
+- **Mac/Linux:** `test -e "$(pwd)/index.ts" && echo "Correct — index.ts found here" || echo "Not found — you're in the wrong folder"`
+- **Windows (PowerShell):** `Test-Path "C:\Users\yourname\finnhub-connector\index.ts"` — should print `True`. Replace the path with your own.
+
+If this fails, you're not in the project folder, or it was cloned somewhere other than expected. Re-run `pwd` (Mac) or `cd` (Windows) to see where you actually are.
+
 **Then open Claude Desktop's config file** (create it if it doesn't exist):
 
 - **Mac:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json` — paste that into File Explorer's address bar to jump straight to the folder.
 
-**Paste in the config, using your own path from above.**
+**If the file is empty or doesn't exist yet**, paste in the full example below, using your own path.
 
-Mac/Linux example:
+**If the file already has content in it** — Claude Desktop often creates one automatically with settings like `preferences` or `coworkUserFilesPath` already inside — don't replace the whole file, or you'll lose your existing settings. Instead, add `"mcpServers"` as a new **top-level key**, a sibling to whatever's already there, not nested inside it. For example, if your file currently looks like this:
+
+```json
+{
+  "preferences": {
+    "sidebarMode": "chat"
+  }
+}
+```
+
+you'd change it to:
+
+```json
+{
+  "mcpServers": {
+    "finnhub": {
+      "command": "npx",
+      "args": ["tsx", "/your/path/here/finnhub-connector/index.ts"]
+    }
+  },
+  "preferences": {
+    "sidebarMode": "chat"
+  }
+}
+```
+
+Note the comma after the `mcpServers` block's closing `}` — required since another key follows it.
+
+Mac/Linux example (starting from an empty file):
 
 ```json
 {
@@ -180,10 +215,36 @@ Windows example — note the **doubled backslashes** (`\\`). This is required be
 
 **Save the file and fully restart Claude Desktop.** Quit it completely — not just closing the window. On Mac, use the **Claude** menu → **Quit Claude**. On Windows, right-click the Claude icon in the system tray and choose **Quit**, or go to **File** → **Exit**. Then reopen it.
 
-The three tools will now be available. Try asking:
+The three tools are now available. Because Claude can call them on its own and reason over the results, you can ask in plain English — no commands to memorize. Try these:
 
+**Single lookups**
 - *"What's Apple's current stock price?"*
-- *"Check my watchlist: AAPL, TSLA, NVDA — flag anything down more than 2% today."*
+- *"Give me a profile of NVIDIA — what industry is it in and how big is it?"*
+
+**Watchlist monitoring**
+- *"Check my watchlist: AAPL, TSLA, NVDA, MSFT, AMZN — flag anything down more than 2% today."*
+- *"Here are my holdings: JPM, BAC, GS, MS. Which one is having the worst day?"*
+
+**Where it gets interesting — Claude chaining tools and reasoning**
+- *"Compare Apple and Microsoft's price change today and tell me which is holding up better."*
+- *"Look up Tesla's profile, then check its current price, and tell me if it's trading like a tech stock or a car company today."*
+- *"Check these five tickers and rank them from best to worst performer today: AAPL, GOOGL, META, AMZN, NFLX."*
+- *"What's the average percentage move across my watchlist today — AAPL, MSFT, NVDA — and is the group up or down overall?"*
+
+The last group is where an MCP tool earns its keep: none of those prompts required extra code. Claude calls the same three simple tools multiple times and composes the results — comparing, ranking, averaging, drawing conclusions. That separation (simple, reliable tools; the model handles the orchestration) is the whole point of the pattern.
+
+---
+
+## Troubleshooting
+
+| Error you see | What it means | Fix |
+|---|---|---|
+| `FATAL: FINNHUB_API_KEY is missing` | `.env` isn't in the project folder, or the key line is malformed | Confirm `.env` (not `.env.example`) exists at the project root and has exactly one line: `FINNHUB_API_KEY=yourkey` |
+| `AUTH ERROR 401` | Finnhub rejected the key | Re-copy the key fresh from your Finnhub dashboard — don't retype it. Some valid Finnhub keys contain repeating-looking character patterns; that alone doesn't mean the key is broken. |
+| `Cannot find module '...index.ts'` / `ERR_MODULE_NOT_FOUND` | The path in `claude_desktop_config.json` doesn't match where the project actually is | Run the path-verification command in Step 5, then update the config's `args` path to match exactly |
+| `Could not load app settings` / JSON parse error | A syntax mistake in `claude_desktop_config.json` — usually a missing comma or an extra `{` or `}` | Paste the file's contents into [jsonlint.com](https://jsonlint.com) to find the exact line with the error |
+| PowerShell: `running scripts is disabled` | Windows blocks `npm`'s script by default | Run `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, confirm with `Y`, then retry |
+| First run shows `npm warn exec ... will be installed` | Normal — the first time, npm downloads a small helper package (`tsx`) before running | Not an error; only happens once |
 
 ---
 
