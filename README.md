@@ -55,11 +55,18 @@ Follow these steps in order. No prior experience with APIs is assumed — each s
 
 ### What you'll need first
 
+- **Claude Desktop.** This is the app that actually runs and talks to this connector — download it from [claude.ai/download](https://claude.ai/download) for Mac or Windows, install it, and sign in.
 - **Node.js** version 18 or newer.
-  - Open a terminal (**Terminal** on Mac, **Command Prompt** or **PowerShell** on Windows) and type `node --version`. If you see `v18.17.0` or higher, you're set. If not, install from [nodejs.org](https://nodejs.org) — pick the **LTS** version.
+  - Open a terminal (**Terminal** on Mac, **PowerShell** on Windows) and type `node --version`. If you see `v18.17.0` or higher, you're set. If not, install from [nodejs.org](https://nodejs.org) — pick the **LTS** version.
 - **Git.** Check with `git --version`.
   - Mac usually has it built in. On Windows, if it's missing, install from [git-scm.com/download/win](https://git-scm.com/download/win) using the default options.
 - **A free Finnhub account** — this is where your API key comes from. The next section walks you through it.
+
+> **Windows note:** if `npm install` fails with an error like *"running scripts is disabled on this system,"* PowerShell is blocking npm's script by default — a standard Windows security setting, not a problem with this project. Fix it once with:
+> ```powershell
+> Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+> ```
+> Confirm with `Y`, then retry `npm install`.
 
 ### Step 1 — Get your free Finnhub API key
 
@@ -169,7 +176,7 @@ Windows example — note the **doubled backslashes** (`\\`). This is required be
 }
 ```
 
-> **Tip for finding the full path:** in your terminal, inside the project folder, run `pwd` (Mac) or `cd` (Windows) — it prints the full folder path. Add `/index.ts` (Mac) or `\index.ts` (Windows) to the end.
+> **Tip for finding the full path:** in your terminal, inside the project folder, run `pwd` (Mac) or `cd` with no arguments (Windows, in PowerShell) — it prints the full folder path. Add `/index.ts` (Mac) or `\index.ts` (Windows) to the end.
 
 **Save the file and fully restart Claude Desktop.** Quit it completely — not just closing the window. On Mac, use the **Claude** menu → **Quit Claude**. On Windows, right-click the Claude icon in the system tray and choose **Quit**. Then reopen it.
 
