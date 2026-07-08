@@ -35,6 +35,8 @@ The third row is the one that matters most: **transport-layer success doesn't gu
 
 **200-with-bad-data — Silent failure.** Discovered during testing, not engineered. A delisted ticker (formerly PNM Resources, acquired by Avangrid) returned `200 OK` with every field zeroed. Added explicit validation to detect and report this instead of returning a misleading quote.
 
+**Project structure.** Originally scaffolded with source files in a `src/` subfolder; later flattened to a single-directory layout for simplicity. This required updating `tsconfig.json`'s `rootDir` and `include` paths to match — a reminder that build configs need to stay in lockstep with actual file layout, not just get written once and forgotten.
+
 ---
 
 ## Tools
@@ -49,11 +51,14 @@ The third row is the one that matters most: **transport-layer success doesn't gu
 
 ## Setup
 
-Follow these steps in order. No prior experience with APIs is assumed — each step says exactly what to do and how to tell it worked.
+Follow these steps in order. No prior experience with APIs is assumed — each step says exactly what to do and how to tell it worked. Instructions cover both **Mac** and **Windows**.
 
 ### What you'll need first
 
-- **Node.js** version 18 or newer. To check, open a terminal (Command Prompt on Windows, Terminal on Mac) and type `node --version`. If you see a number like `v18.17.0` or higher, you're set. If you get an error, install it from [nodejs.org](https://nodejs.org) (pick the "LTS" version).
+- **Node.js** version 18 or newer.
+  - Open a terminal (**Terminal** on Mac, **Command Prompt** or **PowerShell** on Windows) and type `node --version`. If you see `v18.17.0` or higher, you're set. If not, install from [nodejs.org](https://nodejs.org) — pick the **LTS** version.
+- **Git.** Check with `git --version`.
+  - Mac usually has it built in. On Windows, if it's missing, install from [git-scm.com/download/win](https://git-scm.com/download/win) using the default options.
 - **A free Finnhub account** — this is where your API key comes from. The next section walks you through it.
 
 ### Step 1 — Get your free Finnhub API key
@@ -72,7 +77,7 @@ The free plan allows 60 requests per minute, which is plenty for this tool.
 In your terminal, run these three lines one at a time:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/finnhub-connector.git
+git clone https://github.com/harperbrian/finnhub-connector.git
 cd finnhub-connector
 npm install
 ```
@@ -85,13 +90,10 @@ npm install
 
 The project includes a file called `.env.example` that shows the key format. You'll make your own copy called `.env` and put your real key in it.
 
-Run this to make the copy:
+Copy the example file:
 
-```bash
-cp .env.example .env
-```
-
-(On Windows, if `cp` doesn't work, use `copy .env.example .env` instead.)
+- **Mac/Linux:** `cp .env.example .env`
+- **Windows:** `copy .env.example .env`
 
 Now open the new `.env` file in any text editor. You'll see this line:
 
@@ -129,27 +131,49 @@ If you instead see `FATAL: FINNHUB_API_KEY is missing`, your `.env` file either 
 
 This last step tells the Claude Desktop app how to find and run your server.
 
-Open Claude Desktop's config file (create it if it doesn't exist):
+**First, find your project's full path** (you'll need it below):
+
+- **Mac/Linux:** inside the project folder, run `pwd`
+- **Windows:** inside the project folder, run `cd` with no arguments
+
+**Then open Claude Desktop's config file** (create it if it doesn't exist):
 
 - **Mac:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json` — paste that into File Explorer's address bar to jump straight to the folder.
 
-Paste in the following. **You must replace `ABSOLUTE/PATH/TO/` with the real, full location of the folder on your computer** (for example, on Mac: `/Users/brian/projects/finnhub-connector/index.ts`):
+**Paste in the config, using your own path from above.**
+
+Mac/Linux example:
 
 ```json
 {
   "mcpServers": {
     "finnhub": {
       "command": "npx",
-      "args": ["tsx", "ABSOLUTE/PATH/TO/finnhub-connector/index.ts"]
+      "args": ["tsx", "/Users/yourname/finnhub-connector/index.ts"]
     }
   }
 }
 ```
 
-> **Tip for finding the full path:** in your terminal, inside the project folder, type `pwd` (Mac) or `cd` (Windows) — it prints the full folder path. Add `/index.ts` to the end.
+Windows example — note the **doubled backslashes** (`\\`). This is required because JSON treats a single backslash as a special escape character; a single `\` will silently break the path:
 
-Save the file and fully restart Claude Desktop (quit and reopen). The three tools will now be available. Try asking:
+```json
+{
+  "mcpServers": {
+    "finnhub": {
+      "command": "npx",
+      "args": ["tsx", "C:\\Users\\yourname\\finnhub-connector\\index.ts"]
+    }
+  }
+}
+```
+
+> **Tip for finding the full path:** in your terminal, inside the project folder, run `pwd` (Mac) or `cd` (Windows) — it prints the full folder path. Add `/index.ts` (Mac) or `\index.ts` (Windows) to the end.
+
+**Save the file and fully restart Claude Desktop.** Quit it completely — not just closing the window. On Mac, use the **Claude** menu → **Quit Claude**. On Windows, right-click the Claude icon in the system tray and choose **Quit**. Then reopen it.
+
+The three tools will now be available. Try asking:
 
 - *"What's Apple's current stock price?"*
 - *"Check my watchlist: AAPL, TSLA, NVDA — flag anything down more than 2% today."*
