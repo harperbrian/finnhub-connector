@@ -178,7 +178,7 @@ Windows example — note the **doubled backslashes** (`\\`). This is required be
 
 > **Tip for finding the full path:** in your terminal, inside the project folder, run `pwd` (Mac) or `cd` with no arguments (Windows, in PowerShell) — it prints the full folder path. Add `/index.ts` (Mac) or `\index.ts` (Windows) to the end.
 
-**Save the file and fully restart Claude Desktop.** Quit it completely — not just closing the window. On Mac, use the **Claude** menu → **Quit Claude**. On Windows, right-click the Claude icon in the system tray and choose **Quit**. Then reopen it.
+**Save the file and fully restart Claude Desktop.** Quit it completely — not just closing the window. On Mac, use the **Claude** menu → **Quit Claude**. On Windows, right-click the Claude icon in the system tray and choose **Quit**, or go to **File** → **Exit**. Then reopen it.
 
 The three tools will now be available. Try asking:
 
