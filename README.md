@@ -14,7 +14,7 @@ Built in TypeScript and Node.js on the official MCP SDK. It talks to Claude Desk
 
 ## Why this project exists
 
-Connecting an LLM to an external API is easy when everything works. The real engineering happens when it doesn't. A successful HTTP response is not the same thing as valid data. I built this connector to handle four distinct failure modes cleanly, past the happy path.
+Connecting an LLM to an external API is easy when everything works. The real engineering happens when it doesn't. A successful HTTP response is not the same thing as valid data. I built this connector to handle three distinct failure modes cleanly, validated against the happy path.
 
 ## Error handling
 
@@ -23,7 +23,7 @@ Connecting an LLM to an external API is easy when everything works. The real eng
 | Bad or corrupted API key | `401` | Caught before JSON parsing. Surfaces a specific, actionable error instead of crashing. |
 | Rate limit exceeded | `429` | Retries with backoff (3 attempts, 15s apart), logs each attempt, fails the single affected symbol while the rest of the batch completes. |
 | Delisted or invalid ticker | `200` ⚠️ | Finnhub returns `200 OK` with every field zeroed instead of an error. Explicit validation catches this and returns a clear message instead of a misleading $0.00 quote. |
-| Normal request | `200` | Parsed and returned. |
+| Normal request | `200` | Parsed and returned. Shown here for contrast with the row above, this is not a failure mode. |
 
 The third row matters most. Transport-layer success doesn't guarantee application-layer validity. A connector that trusts the HTTP status alone would show a delisted stock as a real $0.00 quote. This one catches it.
 
@@ -251,7 +251,7 @@ TypeScript, Node.js, MCP SDK (`@modelcontextprotocol/sdk`), Zod for input valida
 ## What this project demonstrates
 
 - API key authentication handling
-- HTTP status code discrimination across `401`, `403`, `429`, and `200` with bad data
+- HTTP status code discrimination across `401`, `429`, and `200` with bad data
 - Retry and backoff design that degrades gracefully instead of crashing
 - Recognizing that transport-layer success doesn't equal application-layer validity
 
